@@ -42,7 +42,7 @@ export function ForgotPasswordForm() {
 
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
-            Didn't receive the email? Check your spam folder or try again.
+            {"Didn't receive the email? Check your spam folder or try again."}
           </p>
 
           <button
@@ -85,7 +85,7 @@ export function ForgotPasswordForm() {
           />
         </div>
         <p className="mt-2 text-sm text-gray-500">
-          We'll send you a link to reset your password.
+          {" We'll send you a link to reset your password."}
         </p>
       </div>
 
