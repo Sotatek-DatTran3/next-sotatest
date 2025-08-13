@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { loginSchema } from '@/validations/authSchema';
 import { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -31,6 +32,12 @@ export function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    const result = loginSchema.safeParse(formData);
+    if (!result.success) {
+      setError(result.error.issues.map(issue => issue.message).join(', '));
+      return;
+    }
 
     try {
       await login(formData.email, formData.password);

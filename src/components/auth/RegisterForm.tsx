@@ -1,6 +1,7 @@
 'use client';
 
 import { useRegisterMutation } from '@/hooks/useAuth';
+import { registerSchema } from '@/validations/authSchema';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
 
@@ -33,18 +34,9 @@ export function RegisterForm() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-
-    if (formData.username.length < 3) {
-      setError('Username must be at least 3 characters long');
+    const result = registerSchema.safeParse(formData);
+    if (!result.success) {
+      setError(result.error.issues.map(issue => issue.message).join(', '));
       return;
     }
 
