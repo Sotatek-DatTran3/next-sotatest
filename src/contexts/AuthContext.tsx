@@ -16,33 +16,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<StrapiUser | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   const { data: userData, isLoading, error } = useUserQuery();
   const loginMutation = useLoginMutation();
   const logoutMutation = useLogoutMutation();
 
   const isAuthenticated = !!user;
-  const loading = isLoading || !isHydrated;
-
-  // Hydrate user state from localStorage after component mounts
-  useEffect(() => {
-    if (tokenManager.isClient()) {
-      const savedUser = tokenManager.getUser();
-      if (savedUser && tokenManager.getToken()) {
-        setUser(savedUser);
-      }
-    }
-    setIsHydrated(true);
-  }, []);
+  // Show loading when initializing OR when query is loading
+  const loading = initializing || isLoading;
 
   // Update user state when query data changes
   useEffect(() => {
     if (userData) {
       setUser(userData);
+      setInitializing(false);
     } else if (error || !tokenManager.getToken()) {
       setUser(null);
+      setInitializing(false);
     }
   }, [userData, error]);
+
+  // Handle initial token check
+  useEffect(() => {
+    const token = tokenManager.getToken();
+    if (!token) {
+      setUser(null);
+      setInitializing(false);
+    }
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {

@@ -2,7 +2,6 @@
 
 import { authAPI, tokenManager } from '@/lib/strapi';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 
 // Types for Strapi user
 export interface StrapiUser {
@@ -23,8 +22,6 @@ export interface StrapiAuthResponse {
 
 // Register mutation
 export function useRegisterMutation() {
-  const router = useRouter();
-
   return useMutation({
     mutationFn: async (userData: {
       username: string;
@@ -35,10 +32,10 @@ export function useRegisterMutation() {
       return response as StrapiAuthResponse;
     },
     onSuccess: (data) => {
-      // Auto login after successful registration
       tokenManager.setToken(data.jwt);
       tokenManager.setUser(data.user);
-      router.push('/dashboard');
+      // Refresh page to trigger middleware redirect
+      window.location.href = '/dashboard';
     },
     onError: (error: any) => {
       console.error('Registration failed:', error);
@@ -48,7 +45,6 @@ export function useRegisterMutation() {
 
 // Login mutation
 export function useLoginMutation() {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -63,7 +59,8 @@ export function useLoginMutation() {
       tokenManager.setToken(data.jwt);
       tokenManager.setUser(data.user);
       queryClient.setQueryData(['auth', 'user'], data.user);
-      router.push('/dashboard');
+      // Refresh page to trigger middleware redirect
+      window.location.href = '/dashboard';
     },
     onError: (error: any) => {
       console.error('Login failed:', error);
@@ -92,11 +89,12 @@ export function useUserQuery() {
     enabled: !!tokenManager.getToken(),
     staleTime: 5 * 60 * 1000,
     retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 }
 
 export function useLogoutMutation() {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -105,7 +103,8 @@ export function useLogoutMutation() {
     },
     onSuccess: () => {
       queryClient.clear();
-      router.push('/');
+      // Refresh page to trigger middleware redirect
+      window.location.href = '/';
     },
   });
 }
@@ -120,8 +119,6 @@ export function useForgotPasswordMutation() {
 
 // Reset password mutation
 export function useResetPasswordMutation() {
-  const router = useRouter();
-
   return useMutation({
     mutationFn: async (data: {
       code: string;
@@ -134,7 +131,7 @@ export function useResetPasswordMutation() {
     onSuccess: (data) => {
       tokenManager.setToken(data.jwt);
       tokenManager.setUser(data.user);
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     },
   });
 }

@@ -1,24 +1,13 @@
 'use client';
 
-import ClientOnly from '@/components/ClientOnly';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 function DashboardContent() {
-  const { user, logout, isAuthenticated, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/auth');
-    }
-  }, [isAuthenticated, loading, router]);
+  const { user, logout, loading } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await logout();
-      router.push('/');
+      logout();
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -30,10 +19,6 @@ function DashboardContent() {
         <div className="text-lg">Loading...</div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (
@@ -94,15 +79,5 @@ function DashboardContent() {
 }
 
 export default function Dashboard() {
-  return (
-    <ClientOnly
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-lg">Loading...</div>
-        </div>
-      }
-    >
-      <DashboardContent />
-    </ClientOnly>
-  );
+  return <DashboardContent />;
 }

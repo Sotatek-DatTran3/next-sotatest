@@ -9,10 +9,44 @@ export const strapiApi = axios.create({
   },
 });
 
+// Helper function to get JWT from cookie
+const getJWTFromCookie = (): string | null => {
+  if (typeof window === 'undefined') return null;
+
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'jwt') {
+      return value;
+    }
+  }
+  return null;
+};
+
+// Helper function to get user from cookie
+const getUserFromCookie = (): any | null => {
+  if (typeof window === 'undefined') return null;
+
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'user') {
+      try {
+        return JSON.parse(decodeURIComponent(value));
+      } catch (error) {
+        console.error('Error parsing user from cookie:', error);
+        return null;
+      }
+    }
+  }
+  return null;
+};
+
 strapiApi.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('strapi_jwt');
+      const token = getJWTFromCookie();
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -29,9 +63,9 @@ strapiApi.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('strapi_jwt');
-        localStorage.removeItem('strapi_user');
-        window.location.href = '/auth';
+        document.cookie = 'jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        window.location.reload();
       }
     }
     return Promise.reject(error);
@@ -79,52 +113,46 @@ export const authAPI = {
 export const tokenManager = {
   setToken: (token: string) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('strapi_jwt', token);
+      document.cookie = `jwt=${token}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=strict`;
     }
   },
 
   getToken: () => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('strapi_jwt');
+      return getJWTFromCookie();
     }
     return null;
   },
 
   removeToken: () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('strapi_jwt');
+      document.cookie = 'jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   },
 
   setUser: (user: any) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('strapi_user', JSON.stringify(user));
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`;
     }
   },
 
   getUser: () => {
     if (typeof window !== 'undefined') {
-      try {
-        const user = localStorage.getItem('strapi_user');
-        return user ? JSON.parse(user) : null;
-      } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
-        return null;
-      }
+      return getUserFromCookie();
     }
     return null;
   },
 
   removeUser: () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('strapi_user');
+      document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   },
 
   clear: () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('strapi_jwt');
-      localStorage.removeItem('strapi_user');
+      document.cookie = 'jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   },
 
