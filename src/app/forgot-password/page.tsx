@@ -9,27 +9,32 @@ function ForgotPasswordContent() {
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
 
+  const content = code
+    ? {
+      title: 'Reset your password',
+      message: 'Enter your new password below to complete the reset process.',
+      form: ResetPasswordForm
+    }
+    : {
+      title: 'Forgot your password?',
+      message: "No problem! Enter your email address and we'll send you a link to reset it.",
+      form: ForgotPasswordForm
+    };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {code ? 'Reset your password' : 'Forgot your password?'}
+          {content.title}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          {code
-            ? 'Enter your new password below to complete the reset process.'
-            : 'No problem! Enter your email address and we\'ll send you a link to reset it.'
-          }
+          {content.message}
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {code ? (
-            <ResetPasswordForm code={code} />
-          ) : (
-            <ForgotPasswordForm />
-          )}
+          <content.form code={code ?? ""} />
         </div>
       </div>
     </div>

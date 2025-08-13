@@ -1,6 +1,7 @@
 'use client';
 
 import { authAPI } from '@/lib/strapi';
+import { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -19,12 +20,16 @@ export function ForgotPasswordForm() {
     try {
       await authAPI.forgotPassword(email);
       setSuccess(true);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message ||
-        err.message ||
-        'Failed to send reset email. Please try again.'
-      );
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        setError(
+          err.response?.data?.error?.message ||
+          err.message ||
+          'Failed to send reset email. Please try again.'
+        );
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

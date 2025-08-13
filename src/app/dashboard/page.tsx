@@ -13,6 +13,24 @@ function DashboardContent() {
     }
   };
 
+  const userInfo = [
+    { label: 'Email', value: user?.email },
+    { label: 'Username', value: user?.username },
+    { label: 'User ID', value: user?.id },
+    { label: 'Confirmed', value: user?.confirmed ? 'Yes' : 'No' },
+    { label: 'Provider', value: user?.provider },
+    {
+      label: 'Member since',
+      value: user?.createdAt
+        ? new Date(user.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+        : 'N/A'
+    }
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -58,16 +76,11 @@ function DashboardContent() {
               <div className="bg-white p-6 rounded-lg shadow max-w-md mx-auto">
                 <h3 className="text-lg font-semibold mb-4">Your Profile</h3>
                 <div className="space-y-2 text-left">
-                  <p><strong>Email:</strong> {user?.email}</p>
-                  <p><strong>Username:</strong> {user?.username}</p>
-                  <p><strong>User ID:</strong> {user?.id}</p>
-                  <p><strong>Confirmed:</strong> {user?.confirmed ? 'Yes' : 'No'}</p>
-                  <p><strong>Provider:</strong> {user?.provider}</p>
-                  <p><strong>Member since:</strong> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  }) : 'N/A'}</p>
+                  {userInfo.map((info, index) => (
+                    <p key={index}>
+                      <strong>{info.label}:</strong> {info.value}
+                    </p>
+                  ))}
                 </div>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { StrapiUser } from '@/hooks/useAuth';
 import axios from 'axios';
 
 export const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
@@ -14,29 +15,10 @@ const getJWTFromCookie = (): string | null => {
   if (typeof window === 'undefined') return null;
 
   const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
+  for (const cookie of cookies) {
     const [name, value] = cookie.trim().split('=');
     if (name === 'jwt') {
       return value;
-    }
-  }
-  return null;
-};
-
-// Helper function to get user from cookie
-const getUserFromCookie = (): any | null => {
-  if (typeof window === 'undefined') return null;
-
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    const [name, value] = cookie.trim().split('=');
-    if (name === 'user') {
-      try {
-        return JSON.parse(decodeURIComponent(value));
-      } catch (error) {
-        console.error('Error parsing user from cookie:', error);
-        return null;
-      }
     }
   }
   return null;
@@ -130,17 +112,10 @@ export const tokenManager = {
     }
   },
 
-  setUser: (user: any) => {
+  setUser: (user: StrapiUser) => {
     if (typeof window !== 'undefined') {
       document.cookie = `user=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`;
     }
-  },
-
-  getUser: () => {
-    if (typeof window !== 'undefined') {
-      return getUserFromCookie();
-    }
-    return null;
   },
 
   removeUser: () => {

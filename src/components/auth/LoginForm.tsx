@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -33,12 +34,16 @@ export function LoginForm() {
 
     try {
       await login(formData.email, formData.password);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message ||
-        err.message ||
-        'Login failed. Please try again.'
-      );
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        setError(
+          err.response?.data?.error?.message ||
+          err.message ||
+          'Login failed. Please try again.'
+        );
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

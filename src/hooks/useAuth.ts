@@ -2,6 +2,7 @@
 
 import { authAPI, tokenManager } from '@/lib/strapi';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 // Types for Strapi user
 export interface StrapiUser {
@@ -37,8 +38,12 @@ export function useRegisterMutation() {
       // Refresh page to trigger middleware redirect
       window.location.href = '/dashboard';
     },
-    onError: (error: any) => {
-      console.error('Registration failed:', error);
+    onError: (error: unknown) => {
+      if (error instanceof AxiosError) {
+        console.error('Registration failed:', error.response?.data?.error?.message || error.message);
+      } else {
+        console.error('Registration failed:', error);
+      }
     },
   });
 }
@@ -62,8 +67,12 @@ export function useLoginMutation() {
       // Refresh page to trigger middleware redirect
       window.location.href = '/dashboard';
     },
-    onError: (error: any) => {
-      console.error('Login failed:', error);
+    onError: (error: unknown) => {
+      if (error instanceof AxiosError) {
+        console.error('Login failed:', error.response?.data?.error?.message || error.message);
+      } else {
+        console.error('Login failed:', error);
+      }
     },
   });
 }

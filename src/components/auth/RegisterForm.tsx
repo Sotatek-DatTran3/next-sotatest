@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useRegisterMutation } from '@/hooks/useAuth';
+import { AxiosError } from 'axios';
+import { useState } from 'react';
 
 interface RegisterFormData {
   username: string;
@@ -53,11 +54,15 @@ export function RegisterForm() {
         email: formData.email,
         password: formData.password,
       });
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error?.message || 
-                          err.message || 
-                          'Registration failed. Please try again.';
-      setError(errorMessage);
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        const errorMessage = err.response?.data?.error?.message ||
+          err.message ||
+          'Registration failed. Please try again.';
+        setError(errorMessage);
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     }
   };
 

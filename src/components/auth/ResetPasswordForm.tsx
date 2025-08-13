@@ -1,6 +1,7 @@
 'use client';
 
 import { authAPI } from '@/lib/strapi';
+import { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -57,12 +58,16 @@ export function ResetPasswordForm({ code }: ResetPasswordFormProps) {
       setTimeout(() => {
         router.push('/auth');
       }, 3000);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message ||
-        err.message ||
-        'Failed to reset password. Please try again.'
-      );
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        setError(
+          err.response?.data?.error?.message ||
+          err.message ||
+          'Failed to reset password. Please try again.'
+        );
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
