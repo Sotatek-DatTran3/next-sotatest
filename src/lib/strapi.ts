@@ -1,4 +1,5 @@
 import { StrapiUser } from '@/hooks/useAuth';
+import { getJWTFromCookie } from '@/utils/JWT';
 import axios from 'axios';
 
 export const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
@@ -10,19 +11,7 @@ export const strapiApi = axios.create({
   },
 });
 
-// Helper function to get JWT from cookie
-const getJWTFromCookie = (): string | null => {
-  if (typeof window === 'undefined') return null;
 
-  const cookies = document.cookie.split(';');
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=');
-    if (name === 'jwt') {
-      return value;
-    }
-  }
-  return null;
-};
 
 strapiApi.interceptors.request.use(
   (config) => {

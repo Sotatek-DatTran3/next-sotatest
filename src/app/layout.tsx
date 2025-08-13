@@ -1,8 +1,10 @@
 import { AuthProvider } from "@/contexts/AuthContext";
+import ApolloProvider from "@/providers/ApolloProvider";
 import QueryProvider from "@/providers/QueryProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import Navbar from "@/components/navigation/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,9 +33,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <ApolloProvider>
+            <AuthProvider>
+              <Navbar />
+              <main>{children}</main>
+            </AuthProvider>
+          </ApolloProvider>
         </QueryProvider>
       </body>
     </html>
