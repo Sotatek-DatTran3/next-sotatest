@@ -16,6 +16,7 @@ export default function Navbar() {
 
   const navigation = [
     { name: 'Papers', href: '/papers', current: pathname.startsWith('/papers') },
+    { name: "Video Player", href: "/video-player", current: pathname === '/video-player' },
     { name: 'Dashboard', href: '/dashboard', current: pathname === '/dashboard' },
   ];
 

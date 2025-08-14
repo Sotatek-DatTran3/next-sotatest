@@ -4,7 +4,6 @@ import { authAPI, tokenManager } from '@/lib/strapi';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
-// Types for Strapi user
 export interface StrapiUser {
   id: number;
   username: string;
@@ -98,7 +97,7 @@ export function useUserQuery() {
     enabled: !!tokenManager.getToken(),
     staleTime: 5 * 60 * 1000,
     retry: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
 }
