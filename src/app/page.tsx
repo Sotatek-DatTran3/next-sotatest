@@ -1,9 +1,24 @@
-'use client'
-
+import { AbstractIntlMessages, useTranslations } from "next-intl";
+import { getMessages } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
+export async function generateMetadata({
+  params: { locale }
+}: {
+  params: { locale: string }
+}) {
+  const messages: AbstractIntlMessages = await getMessages({ locale })
+  const homepage = messages.homepage as { title?: string } | undefined
+  const title = homepage?.title
+  return {
+    title
+  }
+}
+
 export default function Home() {
+  const t = useTranslations("homepage")
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -33,7 +48,7 @@ export default function Home() {
             className="rounded-full border border-solid border-indigo-600 bg-indigo-600 text-white transition-colors flex items-center justify-center hover:bg-indigo-700 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
             href="/auth"
           >
-            Sign In / Register
+            {t("auth")}
           </Link>
         </div>
       </main>
