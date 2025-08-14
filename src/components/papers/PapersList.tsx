@@ -1,11 +1,11 @@
 'use client';
 
-import { usePapersQuery } from '@/hooks/usePaperAction';
-import { Paper } from '@/lib/apollo-client';
+import { GET_PAPERS, Paper, PapersResponse } from '@/lib/apollo-client';
+import { useQuery } from '@apollo/client';
 import Link from 'next/link';
 
 export default function PapersList() {
-  const { data, loading, error, refetch } = usePapersQuery();
+  const { data, loading, error, refetch } = useQuery<PapersResponse>(GET_PAPERS);
 
   const papers = data?.papers_connection;
 

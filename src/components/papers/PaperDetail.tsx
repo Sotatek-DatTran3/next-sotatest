@@ -1,12 +1,8 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  useDeletePaperMutation,
-  usePaperQuery,
-  useUpdatePaperMutation
-} from '@/hooks/usePaperAction';
-import { useCallback, useMemo, useState } from 'react';
+import { usePaperDetail } from '@/hooks/usePaperAction';
+import { useMemo } from 'react';
 
 interface PaperDetailProps {
   documentId: string;
@@ -14,50 +10,31 @@ interface PaperDetailProps {
 
 export default function PaperDetail({ documentId }: PaperDetailProps) {
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
-  const [editContent, setEditContent] = useState('');
 
-  const { data, loading, error, refetch } = usePaperQuery(documentId);
-  const [updatePaper, { loading: isUpdating, error: updateError }] = useUpdatePaperMutation(() => {
-    setIsEditing(false);
-    refetch()
-  });
-  const [deletePaper, { loading: isDeleting, error: deleteError }] = useDeletePaperMutation();
-
-  const paper = data?.paper;
-
-  const handleEdit = () => {
-    if (paper) {
-      setEditTitle(paper.title);
-      setEditContent(paper.content);
-      setIsEditing(true);
-    }
-  };
-
-  const handleSaveEdit = useCallback(async () => {
-    updatePaper({
-      variables: {
-        documentId,
-        data: {
-          title: editTitle,
-          content: editContent,
-        }
-      },
-    });
-  }, [documentId, editContent, editTitle, updatePaper]);
-
-  const handleDelete = useCallback(() => {
-    if (window.confirm('Are you sure you want to delete this paper? This action cannot be undone.')) {
-      deletePaper({
-        variables: { documentId }
-      });
-    }
-  }, [deletePaper, documentId]);
+  const {
+    paper,
+    loading,
+    error,
+    refetch,
+    isEditing,
+    editData,
+    setEditData,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    handleDelete,
+    actionLoading,
+    actionError
+  } = usePaperDetail(documentId);
 
   const isAuthor = useMemo(() => {
     return user && paper?.author?.username === user.username;
   }, [user, paper]);
+
+  const isUpdating = actionLoading.update;
+  const isDeleting = actionLoading.delete;
+  const updateError = actionError.update;
+  const deleteError = actionError.delete;
 
   if (loading) {
     return (
@@ -119,8 +96,8 @@ export default function PaperDetail({ documentId }: PaperDetailProps) {
                 <input
                   id="title"
                   type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
+                  value={editData.title}
+                  onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -156,8 +133,8 @@ export default function PaperDetail({ documentId }: PaperDetailProps) {
                 </label>
                 <textarea
                   id="content"
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  value={editData.content}
+                  onChange={(e) => setEditData(prev => ({ ...prev, content: e.target.value }))}
                   rows={10}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -196,7 +173,7 @@ export default function PaperDetail({ documentId }: PaperDetailProps) {
             {isEditing ? (
               <>
                 <button
-                  onClick={handleSaveEdit}
+                  onClick={saveEdit}
                   disabled={isUpdating}
                   className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
@@ -218,7 +195,7 @@ export default function PaperDetail({ documentId }: PaperDetailProps) {
                   )}
                 </button>
                 <button
-                  onClick={() => setIsEditing(false)}
+                  onClick={cancelEdit}
                   disabled={isUpdating}
                   className="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
@@ -230,7 +207,7 @@ export default function PaperDetail({ documentId }: PaperDetailProps) {
                 {isAuthor && (
                   <>
                     <button
-                      onClick={handleEdit}
+                      onClick={startEdit}
                       disabled={isDeleting}
                       className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
