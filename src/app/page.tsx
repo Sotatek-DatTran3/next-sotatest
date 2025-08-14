@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 export async function generateMetadata({
-  params: { locale }
+  params
 }: {
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params;
   const messages: AbstractIntlMessages = await getMessages({ locale })
   const homepage = messages.homepage as { title?: string } | undefined
   const title = homepage?.title
